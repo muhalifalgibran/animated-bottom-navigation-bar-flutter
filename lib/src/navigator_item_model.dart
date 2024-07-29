@@ -5,20 +5,22 @@ class NavigatorItemModel extends StatelessWidget {
   NavigatorItemModel({
     Key? key,
     required this.title,
-    this.icon,
     this.child,
+    this.icon,
     this.iconColor,
     this.iconActiveColor,
     this.titleStyle,
     this.isActive = false,
     this.padding,
     this.width,
+    this.activeChild,
   }) : super(key: key);
   final String title;
   final TextStyle? titleStyle;
   final IconData? icon;
   final Color? iconColor;
   final Widget? child;
+  final Widget? activeChild;
   final Color? iconActiveColor;
   final bool isActive;
   final EdgeInsetsGeometry? padding;
@@ -30,6 +32,8 @@ class NavigatorItemModel extends StatelessWidget {
     String? title,
     TextStyle? titleStyle,
     IconData? icon,
+    Widget? child,
+    Widget? activeChild,
     Color? iconColor,
     Color? iconActiveColor,
     bool? isActive,
@@ -40,6 +44,8 @@ class NavigatorItemModel extends StatelessWidget {
         title: title ?? this.title,
         titleStyle: titleStyle ?? this.titleStyle,
         icon: icon ?? this.icon,
+        child: child ?? this.child,
+        activeChild: activeChild ?? this.activeChild,
         iconColor: iconColor ?? this.iconColor,
         iconActiveColor: iconActiveColor ?? this.iconActiveColor,
         isActive: isActive ?? this.isActive,
@@ -56,7 +62,11 @@ class NavigatorItemModel extends StatelessWidget {
         // mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          child ?? Icon(icon, size: 24, color: color),
+          if (activeChild != null && child != null) ...[
+            isActive ? activeChild! : child!,
+          ] else ...[
+            child ?? Icon(icon, size: 24, color: color),
+          ],
           const SizedBox(height: 4),
           Container(
             // padding: padding ?? const EdgeInsets.symmetric(horizontal: 0),

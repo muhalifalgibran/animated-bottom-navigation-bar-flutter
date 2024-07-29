@@ -39,7 +39,16 @@ class _MyAppState extends State<MyApp> {
       title: 'Home',
       // iconColor: Colors.white,
       titleStyle: TextStyle(fontSize: 12),
-      icon: Icons.home,
+      child: Icon(
+        Icons.wallet,
+        color: Colors.white,
+        size: 24,
+      ),
+      activeChild: Icon(
+        Icons.wallet,
+        color: Colors.green,
+        size: 24,
+      ),
     ),
     NavigatorItemModel(
       title: 'Market',
