@@ -6,6 +6,7 @@ class NavigatorItemModel extends StatelessWidget {
     Key? key,
     required this.title,
     this.icon,
+    this.child,
     this.iconColor,
     this.iconActiveColor,
     this.titleStyle,
@@ -17,6 +18,7 @@ class NavigatorItemModel extends StatelessWidget {
   final TextStyle? titleStyle;
   final IconData? icon;
   final Color? iconColor;
+  final Widget? child;
   final Color? iconActiveColor;
   final bool isActive;
   final EdgeInsetsGeometry? padding;
@@ -54,11 +56,7 @@ class NavigatorItemModel extends StatelessWidget {
         // mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Icon(
-            icon,
-            size: 24,
-            color: color,
-          ),
+          child ?? Icon(icon, size: 24, color: color),
           const SizedBox(height: 4),
           Container(
             // padding: padding ?? const EdgeInsets.symmetric(horizontal: 0),
