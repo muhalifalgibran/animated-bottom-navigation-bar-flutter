@@ -1,16 +1,74 @@
-import 'dart:async';
-
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:circular_reveal_animation/circular_reveal_animation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:lanarsnavbarflutter/body_home.dart';
 import 'package:lanarsnavbarflutter/theme/app_theme.dart';
 import 'package:lanarsnavbarflutter/theme/custom_colors_theme.dart';
+import 'package:lanarsnavbarflutter/tooltip/clipper_border_painter.dart';
+import 'package:lanarsnavbarflutter/tooltip/nav_bar_clipper.dart';
+import 'package:lanarsnavbarflutter/tooltip/widget_size.dart';
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final List<Widget> childrenItem = [
+    Container(height: 40, width: 100, color: Colors.yellow),
+    Container(height: 40, width: 100, color: Colors.blue),
+    Container(height: 40, width: 100, color: Colors.orange),
+  ];
+
+  final List<Widget> bodies = [
+    BodyHome(title: 'Zero'),
+    BodyHome(title: 'One'),
+    BodyHome(title: 'Two'),
+    BodyHome(title: 'Three'),
+    BodyHome(title: 'Four'),
+    BodyHome(title: 'Five'),
+    BodyHome(title: 'Six'),
+    BodyHome(title: 'Seven'),
+  ];
+
+  final List<NavigatorItemModel> navigatorItem = [
+    NavigatorItemModel(
+      title: 'Home',
+      // iconColor: Colors.white,
+      titleStyle: TextStyle(fontSize: 12),
+      icon: Icons.home,
+    ),
+    NavigatorItemModel(
+      title: 'Market',
+      icon: Icons.balcony_outlined,
+      titleStyle: TextStyle(fontSize: 12),
+      // iconColor: Colors.white,
+    ),
+    NavigatorItemModel(
+      title: 'Instant Convert',
+      // iconColor: Colors.white,
+      titleStyle: TextStyle(fontSize: 12),
+      width: 110,
+    ),
+    NavigatorItemModel(
+      title: 'Earn',
+      icon: Icons.earbuds_rounded,
+      // iconColor: Colors.white,
+      titleStyle: TextStyle(fontSize: 12),
+    ),
+    NavigatorItemModel(
+      title: 'Wallet',
+      icon: Icons.wallet,
+      // iconColor: Colors.white,
+      titleStyle: TextStyle(fontSize: 12),
+    ),
+  ];
+  int index = 0;
+  var isChildrenItemTapped = false;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,15 +76,82 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: AppTheme.get(isLight: true),
       darkTheme: AppTheme.get(isLight: false),
-      home: MyHomePage(title: 'Animated Navigation Bottom Bar'),
+      home: MyHomePage(
+        title: 'Animated Navigation Bottom Bar',
+        onTapItem: (value) {
+          /* change navigator item text syle */
+          isChildrenItemTapped = true;
+          var fontWeight =
+              isChildrenItemTapped ? FontWeight.bold : FontWeight.bold;
+          if (value == 2) {
+            navigatorItem[2] = NavigatorItemModel(
+              title: 'Instant Convert 1',
+              // iconColor: Colors.white,
+              titleStyle: TextStyle(
+                fontSize: 12,
+                fontWeight: fontWeight,
+              ),
+              width: 112,
+            );
+          } else if (value == 3) {
+            navigatorItem[2] = NavigatorItemModel(
+              title: 'Auto Invest',
+              // iconColor: Colors.white,
+              titleStyle: TextStyle(
+                fontSize: 12,
+                fontWeight: fontWeight,
+              ),
+              width: 112,
+            );
+          } else if (value == 4) {
+            navigatorItem[2] = NavigatorItemModel(
+              title: 'Trade',
+              // iconColor: Colors.white,
+              titleStyle: TextStyle(fontSize: 12, fontWeight: fontWeight),
+              width: 112,
+            );
+          }
+          setState(() {
+            index = value;
+          });
+          print(index);
+        },
+        onTapMenu: (value) {
+          isChildrenItemTapped = false;
+          navigatorItem[2] = navigatorItem[2].copyWith(
+            titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+          );
+          setState(() {
+            index = value;
+          });
+          print(index);
+        },
+        childrenItemMenu: childrenItem,
+        body: bodies[index],
+        navigatorItem: navigatorItem,
+      ),
+      // home: ManualBar(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  MyHomePage({
+    Key? key,
+    required this.title,
+    required this.onTapItem,
+    required this.onTapMenu,
+    required this.childrenItemMenu,
+    required this.body,
+    required this.navigatorItem,
+  }) : super(key: key);
 
   final String title;
+  final Function(int) onTapItem;
+  final Function(int) onTapMenu;
+  final List<Widget> childrenItemMenu;
+  final List<NavigatorItemModel> navigatorItem;
+  final Widget body;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -35,80 +160,59 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   final autoSizeGroup = AutoSizeGroup();
   var _bottomNavIndex = 0; //default index of a first screen
+  var _isItemTapped = false;
 
-  late AnimationController _fabAnimationController;
-  late AnimationController _borderRadiusAnimationController;
   late Animation<double> fabAnimation;
-  late Animation<double> borderRadiusAnimation;
   late CurvedAnimation fabCurve;
   late CurvedAnimation borderRadiusCurve;
-  late AnimationController _hideBottomBarAnimationController;
 
-  final iconList = <IconData>[
-    Icons.brightness_5,
-    Icons.brightness_4,
-    Icons.brightness_6,
-    Icons.brightness_7,
-  ];
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  Size? childSize;
 
   @override
   void initState() {
     super.initState();
-
-    _fabAnimationController = AnimationController(
-      duration: Duration(milliseconds: 500),
+    _setRelativePosition();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _borderRadiusAnimationController = AnimationController(
-      duration: Duration(milliseconds: 500),
-      vsync: this,
-    );
-    fabCurve = CurvedAnimation(
-      parent: _fabAnimationController,
-      curve: Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-    );
-    borderRadiusCurve = CurvedAnimation(
-      parent: _borderRadiusAnimationController,
-      curve: Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-    );
-
-    fabAnimation = Tween<double>(begin: 0, end: 1).animate(fabCurve);
-    borderRadiusAnimation = Tween<double>(begin: 0, end: 1).animate(
-      borderRadiusCurve,
-    );
-
-    _hideBottomBarAnimationController = AnimationController(
-      duration: Duration(milliseconds: 200),
-      vsync: this,
-    );
-
-    Future.delayed(
-      Duration(seconds: 1),
-      () => _fabAnimationController.forward(),
-    );
-    Future.delayed(
-      Duration(seconds: 1),
-      () => _borderRadiusAnimationController.forward(),
+    _animation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.linear,
+        reverseCurve: Curves.linear,
+      ),
     );
   }
 
-  bool onScrollNotification(ScrollNotification notification) {
-    if (notification is UserScrollNotification &&
-        notification.metrics.axis == Axis.vertical) {
-      switch (notification.direction) {
-        case ScrollDirection.forward:
-          _hideBottomBarAnimationController.reverse();
-          _fabAnimationController.forward(from: 0);
-          break;
-        case ScrollDirection.reverse:
-          _hideBottomBarAnimationController.forward();
-          _fabAnimationController.reverse(from: 1);
-          break;
-        case ScrollDirection.idle:
-          break;
-      }
+  GlobalKey targetKey = GlobalKey();
+  bool isTooltipVisible = false;
+  Offset targetPosition = Offset.zero;
+  bool isVisible = false;
+
+  void _setRelativePosition() {
+    final RenderBox? renderBox =
+        targetKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final position = renderBox.localToGlobal(Offset.zero);
+      setState(() {
+        targetPosition = position;
+        isTooltipVisible = true;
+      });
     }
-    return false;
+  }
+
+  void _setVisibility(bool value) async {
+    if (value) {
+      isVisible = value;
+      _controller.forward();
+    } else {
+      await _controller.reverse();
+      isVisible = value;
+    }
+    setState(() {});
   }
 
   @override
@@ -116,154 +220,204 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     final colors = Theme.of(context).extension<CustomColorsTheme>()!;
     return Scaffold(
       extendBody: true,
-      appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: TextStyle(color: Colors.white),
-        ),
+      body: Stack(
+        children: [
+          Stack(
+            children: [
+              /* this will be the child from parent that call this class */
+              // NavigationScreen(iconList[_bottomNavIndex]),
+              widget.body,
+              /*  */
+              Visibility(
+                visible: isVisible,
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.grey.withOpacity(0.5),
+                ),
+              ),
+            ],
+          ),
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return Transform.translate(
+                offset: Offset(0, (1 - _animation.value) * 200),
+                child: Stack(
+                  children: [
+                    Visibility(
+                      visible: isVisible,
+                      child: Positioned(
+                        left: 15,
+                        right: 15,
+                        bottom: (MediaQuery.of(context).size.height -
+                                targetPosition.dy) +
+                            2.6,
+                        child: Align(
+                          alignment: Alignment(0, 0.562),
+                          child: CustomPaint(
+                            painter: ClipperBorderPainter(),
+                            child: Container(
+                              height: (childSize?.height ?? 0) + 3,
+                              width: (childSize?.width ?? 0) + 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Visibility(
+                      visible: isVisible,
+                      child: Positioned(
+                        left: 16,
+                        right: 16,
+                        bottom: (MediaQuery.of(context).size.height -
+                                targetPosition.dy) +
+                            4,
+                        child: ClipPath(
+                          clipper: NavBarClipper(),
+                          child: WidgetSize(
+                            onChange: (value) {
+                              setState(() {
+                                childSize = value;
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                // direction: Axis,
+                                children: List.generate(
+                                    widget.childrenItemMenu.length, (index) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      _setVisibility(false);
+                                      setState(() {
+                                        _isItemTapped = true;
+                                      });
+                                      widget.onTapItem(index + 2);
+                                    },
+                                    child: widget.childrenItemMenu[index],
+                                  );
+                                }),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: onScrollNotification,
-        child: NavigationScreen(iconList[_bottomNavIndex]),
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.brightness_3,
-          color: AppTheme.colorGray,
-        ),
-        onPressed: () {
-          _fabAnimationController.reset();
-          _borderRadiusAnimationController.reset();
-          _borderRadiusAnimationController.forward();
-          _fabAnimationController.forward();
-        },
+      floatingActionButton: Stack(
+        children: [
+          Visibility(
+            visible: !isVisible,
+            child: Container(
+              padding: const EdgeInsets.only(
+                top: 18,
+                // left: 18,
+                // right: 18,
+              ),
+              height: 70,
+              // width: 70,
+              child: FittedBox(
+                key: targetKey,
+                child: FloatingActionButton(
+                  splashColor: Colors.transparent,
+                  shape: CircleBorder(),
+                  child: Icon(
+                    Icons.brightness_3,
+                    color: AppTheme.colorGray,
+                  ),
+                  onPressed: () {
+                    _setVisibility(true);
+                    _setRelativePosition();
+                  },
+                ),
+              ),
+            ),
+          ),
+          Visibility(
+            visible: isVisible,
+            child: Container(
+              padding: const EdgeInsets.only(
+                top: 18,
+                // left: 18,
+                // right: 18,
+              ),
+              height: 70,
+              // width: 70,
+              child: FittedBox(
+                child: FloatingActionButton(
+                  splashColor: Colors.transparent,
+                  backgroundColor: Colors.white,
+                  shape: CircleBorder(),
+                  child: Icon(
+                    Icons.close,
+                    color: AppTheme.colorGray,
+                  ),
+                  onPressed: () {
+                    _setVisibility(false);
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
-        itemCount: iconList.length,
+        isTooltipActive: isVisible,
+        itemCount: widget.navigatorItem.length,
+        height: 50,
+        gapWidth: 0,
         tabBuilder: (int index, bool isActive) {
-          final color = isActive
-              ? colors.activeNavigationBarColor
-              : colors.notActiveNavigationBarColor;
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                iconList[index],
-                size: 24,
-                color: color,
-              ),
-              const SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: AutoSizeText(
-                  "brightness $index",
-                  maxLines: 1,
-                  style: TextStyle(color: color),
-                  group: autoSizeGroup,
-                ),
-              )
-            ],
+          if (_isItemTapped) isActive = false;
+
+          return widget.navigatorItem[index].copyWith(
+            isActive: isActive,
+            iconColor: colors.notActiveNavigationBarColor,
+            iconActiveColor: colors.activeNavigationBarColor,
           );
         },
         backgroundColor: colors.bottomNavigationBarBackgroundColor,
         activeIndex: _bottomNavIndex,
         splashColor: colors.activeNavigationBarColor,
-        notchAndCornersAnimation: borderRadiusAnimation,
-        splashSpeedInMilliseconds: 300,
         notchSmoothness: NotchSmoothness.defaultEdge,
-        gapLocation: GapLocation.center,
-        leftCornerRadius: 32,
-        rightCornerRadius: 32,
-        onTap: (index) => setState(() => _bottomNavIndex = index),
-        hideAnimationController: _hideBottomBarAnimationController,
+        splashRadius: 0,
+        notchMargin: 1,
+        scaleFactor: 0.1,
+        gapLocation: GapLocation.none,
+        // leftCornerRadius: 32,
+        // rightCornerRadius: 32,
+        onTap: (index) {
+          /* not tap mid */
+          var temp = index;
+          var isThroughMid = index > widget.childrenItemMenu.length + 1 ~/ 2;
+          if (isThroughMid) temp += widget.childrenItemMenu.length - 1;
+          if (widget.navigatorItem.length % 2 == 1 &&
+              widget.navigatorItem.length ~/ 2 == index) {
+            return;
+          }
+          widget.onTapMenu(temp);
+          setState(() {
+            _isItemTapped = false;
+            _bottomNavIndex = index;
+          });
+        },
+        // hideAnimationController: _hideBottomBarAnimationController,
         shadow: BoxShadow(
           offset: Offset(0, 1),
           blurRadius: 12,
           spreadRadius: 0.5,
-          color: colors.activeNavigationBarColor,
+          color: Colors.black.withOpacity(0.24),
         ),
-      ),
-    );
-  }
-}
-
-class NavigationScreen extends StatefulWidget {
-  final IconData iconData;
-
-  NavigationScreen(this.iconData) : super();
-
-  @override
-  _NavigationScreenState createState() => _NavigationScreenState();
-}
-
-class _NavigationScreenState extends State<NavigationScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> animation;
-
-  @override
-  void didUpdateWidget(NavigationScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.iconData != widget.iconData) {
-      _startAnimation();
-    }
-  }
-
-  @override
-  void initState() {
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 1000),
-    );
-    animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
-    _controller.forward();
-    super.initState();
-  }
-
-  _startAnimation() {
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 1000),
-    );
-    animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<CustomColorsTheme>()!;
-    return Container(
-      color: Theme.of(context).colorScheme.background,
-      child: ListView(
-        children: [
-          SizedBox(height: 64),
-          Center(
-            child: CircularRevealAnimation(
-              animation: animation,
-              centerOffset: Offset(80, 80),
-              maxRadius: MediaQuery.of(context).size.longestSide * 1.1,
-              child: Icon(
-                widget.iconData,
-                color: colors.activeNavigationBarColor,
-                size: 160,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

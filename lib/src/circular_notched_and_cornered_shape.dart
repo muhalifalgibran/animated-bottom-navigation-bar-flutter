@@ -98,7 +98,7 @@ class CircularNotchedAndCorneredRectangle extends NotchedShape {
     final double s1 = notchSmoothness.s1;
     final double s2 = notchSmoothness.s2;
 
-    double r = notchRadius;
+    double r = notchRadius + 6;
     double a = -1.0 * r - s2;
     double b = host.top - guest.center.dy;
 
@@ -106,7 +106,7 @@ class CircularNotchedAndCorneredRectangle extends NotchedShape {
     double p2xA = ((a * r * r) - n2) / (a * a + b * b);
     double p2xB = ((a * r * r) + n2) / (a * a + b * b);
     double p2yA = math.sqrt(r * r - p2xA * p2xA);
-    double p2yB = math.sqrt(r * r - p2xB * p2xB);
+    double p2yB = math.sqrt(r * r - p2xB * p2xB) + 4;
 
     List<Offset> p = List.filled(6, Offset.zero, growable: true);
 
@@ -134,13 +134,13 @@ class CircularNotchedAndCorneredRectangle extends NotchedShape {
         clockwise: true,
       )
       ..lineTo(p[0].dx, p[0].dy)
-      ..quadraticBezierTo(p[1].dx, p[1].dy, p[2].dx, p[2].dy)
+      ..quadraticBezierTo(p[1].dx + 2, p[1].dy - 2, p[2].dx, p[2].dy)
       ..arcToPoint(
         p[3],
         radius: Radius.circular(notchRadius),
         clockwise: false,
       )
-      ..quadraticBezierTo(p[4].dx, p[4].dy, p[5].dx, p[5].dy)
+      ..quadraticBezierTo(p[4].dx - 2, p[4].dy - 2, p[5].dx, p[5].dy)
       ..lineTo(host.right - rightCornerRadius, host.top)
       ..arcToPoint(
         Offset(host.right, host.top + rightCornerRadius),

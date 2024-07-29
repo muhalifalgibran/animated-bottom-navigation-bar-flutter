@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 export 'package:animated_bottom_navigation_bar/src/safe_area_values.dart';
+export 'package:animated_bottom_navigation_bar/src/navigator_item_model.dart';
 
 /// Signature for a function that creates a widget for a given index & state.
 /// Used by [AnimatedBottomNavigationBar.builder].
@@ -123,6 +124,11 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
   /// To disable scale effect set value of 0.
   final double scaleFactor;
 
+  /// Override the widget body whenever
+  ///
+  /// the tooltip is active
+  final bool isTooltipActive;
+
   static const _defaultSplashRadius = 24.0;
 
   AnimatedBottomNavigationBar._internal(
@@ -156,6 +162,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
       this.hideAnimationController,
       this.backgroundGradient,
       this.blurEffect = false,
+      this.isTooltipActive = false,
       this.blurFilter,
       this.scaleFactor = 1.0})
       : assert(icons != null || itemCount != null),
@@ -270,6 +277,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
     AnimationController? hideAnimationController,
     Gradient? backgroundGradient,
     bool blurEffect = false,
+    bool isTooltipActive = false,
     ImageFilter? imageFilter,
     double scaleFactor = 1.0,
   }) : this._internal(
@@ -300,6 +308,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
           backgroundGradient: backgroundGradient,
           blurEffect: blurEffect,
           blurFilter: imageFilter,
+          isTooltipActive: isTooltipActive,
           scaleFactor: scaleFactor,
         );
 
@@ -416,20 +425,23 @@ class _AnimatedBottomNavigationBarState
     return Material(
       clipBehavior: Clip.antiAlias,
       color: widget.backgroundColor ?? Colors.white,
-      child: SafeArea(
-        top: widget.safeAreaValues.top,
-        bottom: widget.safeAreaValues.bottom,
-        left: widget.safeAreaValues.left,
-        right: widget.safeAreaValues.right,
-        child: widget.blurEffect
-            ? ClipRect(
-                child: BackdropFilter(
-                  filter: widget.blurFilter ??
-                      ImageFilter.blur(sigmaX: 5, sigmaY: 10),
-                  child: _buildBody(context),
-                ),
-              )
-            : _buildBody(context),
+      child: Container(
+        color: widget.isTooltipActive ? Colors.grey.withOpacity(0.6) : null,
+        child: SafeArea(
+          top: widget.safeAreaValues.top,
+          bottom: widget.safeAreaValues.bottom,
+          left: widget.safeAreaValues.left,
+          right: widget.safeAreaValues.right,
+          child: widget.blurEffect
+              ? ClipRect(
+                  child: BackdropFilter(
+                    filter: widget.blurFilter ??
+                        ImageFilter.blur(sigmaX: 5, sigmaY: 10),
+                    child: _buildBody(context),
+                  ),
+                )
+              : _buildBody(context),
+        ),
       ),
     );
   }
@@ -437,17 +449,30 @@ class _AnimatedBottomNavigationBarState
   Widget _buildBody(BuildContext context) {
     final bottomPadding =
         widget.safeAreaValues.bottom ? 0 : MediaQuery.paddingOf(context).bottom;
-    return Container(
-      height: (widget.height ?? kBottomNavigationBarHeight) + bottomPadding,
-      decoration: BoxDecoration(
-        color: widget.backgroundColor ?? Colors.white,
-        gradient: widget.backgroundGradient,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: _buildItems(),
-      ),
+    return Stack(
+      children: [
+        Container(
+          height: (widget.height ?? kBottomNavigationBarHeight) +
+              bottomPadding +
+              16,
+          decoration: BoxDecoration(
+            color: widget.backgroundColor ?? Colors.white,
+            gradient: widget.backgroundGradient,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: _buildItems(),
+          ),
+        ),
+        if (widget.isTooltipActive)
+          Container(
+            height: (widget.height ?? kBottomNavigationBarHeight) +
+                bottomPadding +
+                16,
+            color: Colors.grey.withOpacity(0.6),
+          ),
+      ],
     );
   }
 
