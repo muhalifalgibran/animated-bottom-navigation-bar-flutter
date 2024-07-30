@@ -436,7 +436,9 @@ class _AnimatedBottomNavigationBarState
       clipBehavior: Clip.antiAlias,
       color: widget.backgroundColor ?? Colors.white,
       child: Container(
-        color: widget.isTooltipActive ? Colors.grey.withOpacity(0.6) : null,
+        color: widget.isTooltipActive
+            ? widget.blurColor ?? Colors.grey.withOpacity(0.6)
+            : null,
         child: SafeArea(
           top: widget.safeAreaValues.top,
           bottom: widget.safeAreaValues.bottom,
