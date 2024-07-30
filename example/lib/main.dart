@@ -167,17 +167,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  final autoSizeGroup = AutoSizeGroup();
-  var _bottomNavIndex = 0; //default index of a first screen
+  var _bottomNavIndex = 0;
   var _isItemTapped = false;
-
-  late Animation<double> fabAnimation;
-  late CurvedAnimation fabCurve;
-  late CurvedAnimation borderRadiusCurve;
 
   late AnimationController _controller;
   late Animation<double> _animation;
   Size? childSize;
+
+  GlobalKey targetKey = GlobalKey();
+  bool isTooltipVisible = false;
+  Offset targetPosition = Offset.zero;
+  bool isVisible = false;
 
   @override
   void initState() {
@@ -195,11 +195,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
     );
   }
-
-  GlobalKey targetKey = GlobalKey();
-  bool isTooltipVisible = false;
-  Offset targetPosition = Offset.zero;
-  bool isVisible = false;
 
   void _setRelativePosition() {
     final RenderBox? renderBox =

@@ -129,6 +129,11 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
   /// the tooltip is active
   final bool isTooltipActive;
 
+  /// blur color
+  ///
+  ///
+  final Color? blurColor;
+
   static const _defaultSplashRadius = 24.0;
 
   AnimatedBottomNavigationBar._internal(
@@ -155,6 +160,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
       this.gapWidth,
       this.elevation,
       this.shadow,
+      this.blurColor,
       this.borderColor,
       this.borderWidth,
       this.safeAreaValues = const SafeAreaValues(),
@@ -209,6 +215,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
     double? elevation,
     Shadow? shadow,
     Color? borderColor,
+    Color? blurColor,
     double? borderWidth,
     SafeAreaValues safeAreaValues = const SafeAreaValues(),
     Curve? hideAnimationCurve,
@@ -227,6 +234,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
           splashSpeedInMilliseconds: splashSpeedInMilliseconds,
           notchMargin: notchMargin,
           backgroundColor: backgroundColor,
+          blurColor: blurColor,
           splashColor: splashColor,
           activeColor: activeColor,
           inactiveColor: inactiveColor,
@@ -265,6 +273,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
     Animation<double>? notchAndCornersAnimation,
     double? leftCornerRadius,
     double? rightCornerRadius,
+    Color? blurColor,
     NotchSmoothness? notchSmoothness,
     GapLocation? gapLocation,
     double? gapWidth,
@@ -287,6 +296,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
           activeIndex: activeIndex,
           onTap: onTap,
           height: height,
+          blurColor: blurColor,
           splashRadius: splashRadius ?? _defaultSplashRadius,
           splashSpeedInMilliseconds: splashSpeedInMilliseconds,
           notchMargin: notchMargin,
@@ -470,7 +480,7 @@ class _AnimatedBottomNavigationBarState
             height: (widget.height ?? kBottomNavigationBarHeight) +
                 bottomPadding +
                 16,
-            color: Colors.grey.withOpacity(0.6),
+            color: widget.blurColor ?? Colors.grey.withOpacity(0.6),
           ),
       ],
     );
