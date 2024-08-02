@@ -14,6 +14,7 @@ class NavigationBarItem extends StatelessWidget {
   final double? iconSize;
   final VoidCallback onTap;
   final Widget? child;
+  final double? height;
 
   NavigationBarItem({
     required this.isActive,
@@ -27,11 +28,13 @@ class NavigationBarItem extends StatelessWidget {
     required this.iconSize,
     required this.onTap,
     this.child,
+    this.height,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Padding(
+      padding: EdgeInsets.only(bottom: (height ?? 0) * 0.19),
       child: CustomPaint(
         painter: BubblePainter(
           bubbleRadius: isActive ? bubbleRadius : 0,

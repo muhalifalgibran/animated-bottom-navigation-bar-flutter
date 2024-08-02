@@ -379,7 +379,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       bottomNavigationBar: AnimatedBottomNavigationBar.builder(
         isTooltipActive: isVisible,
         itemCount: widget.navigatorItem.length,
-        height: 50,
+        height: 62,
         gapWidth: 0,
         tabBuilder: (int index, bool isActive) {
           if (_isItemTapped) isActive = false;

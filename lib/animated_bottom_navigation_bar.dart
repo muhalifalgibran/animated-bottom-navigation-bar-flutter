@@ -515,6 +515,7 @@ class _AnimatedBottomNavigationBarState
           iconData: widget.icons?.elementAt(i),
           iconScale: _iconScale,
           iconSize: widget.iconSize,
+          height: widget.height,
           onTap: () => widget.onTap(i),
         ),
       );
