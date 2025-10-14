@@ -229,6 +229,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
     Gradient? backgroundGradient,
     ImageFilter? imageFilter,
     bool blurEffect = false,
+    MainAxisAlignment? mainAxisAlignment,
     double scaleFactor = 1.0,
   }) : this._internal(
           key: key,
@@ -262,6 +263,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
           blurFilter: imageFilter,
           blurEffect: blurEffect,
           scaleFactor: scaleFactor,
+          mainAxisAlignment: mainAxisAlignment,
         );
 
   AnimatedBottomNavigationBar.builder({
@@ -294,6 +296,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
     bool blurEffect = false,
     bool isTooltipActive = false,
     ImageFilter? imageFilter,
+    MainAxisAlignment? mainAxisAlignment,
     double scaleFactor = 1.0,
   }) : this._internal(
           key: key,
@@ -326,6 +329,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
           blurFilter: imageFilter,
           isTooltipActive: isTooltipActive,
           scaleFactor: scaleFactor,
+          mainAxisAlignment: mainAxisAlignment,
         );
 
   @override
