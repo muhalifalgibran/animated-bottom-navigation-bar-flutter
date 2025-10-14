@@ -390,7 +390,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             iconActiveColor: colors.activeNavigationBarColor,
           );
         },
-        backgroundColor: colors.bottomNavigationBarBackgroundColor,
+        backgroundColor:
+            colors.bottomNavigationBarBackgroundColor.withOpacity(0.5),
         activeIndex: _bottomNavIndex,
         splashColor: colors.activeNavigationBarColor,
         notchSmoothness: NotchSmoothness.defaultEdge,
@@ -416,12 +417,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           });
         },
         // hideAnimationController: _hideBottomBarAnimationController,
-        shadow: BoxShadow(
-          offset: Offset(0, 1),
-          blurRadius: 12,
-          spreadRadius: 0.5,
-          color: Colors.black.withOpacity(0.24),
-        ),
+        // shadow: BoxShadow(
+        //   offset: Offset(0, 1),
+        //   blurRadius: 12,
+        //   spreadRadius: 0.5,
+        //   color: Colors.black.withOpacity(0.24),
+        // ),
       ),
     );
   }

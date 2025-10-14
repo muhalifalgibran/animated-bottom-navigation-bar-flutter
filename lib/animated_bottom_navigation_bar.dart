@@ -13,8 +13,8 @@ import 'package:animated_bottom_navigation_bar/src/visible_animator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-export 'package:animated_bottom_navigation_bar/src/safe_area_values.dart';
 export 'package:animated_bottom_navigation_bar/src/navigator_item_model.dart';
+export 'package:animated_bottom_navigation_bar/src/safe_area_values.dart';
 
 /// Signature for a function that creates a widget for a given index & state.
 /// Used by [AnimatedBottomNavigationBar.builder].
@@ -134,6 +134,11 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
   ///
   final Color? blurColor;
 
+  /// MainAxisAlignment for the Row
+  ///
+  ///
+  final MainAxisAlignment? mainAxisAlignment;
+
   static const _defaultSplashRadius = 24.0;
 
   AnimatedBottomNavigationBar._internal(
@@ -170,6 +175,7 @@ class AnimatedBottomNavigationBar extends StatefulWidget {
       this.blurEffect = false,
       this.isTooltipActive = false,
       this.blurFilter,
+      this.mainAxisAlignment,
       this.scaleFactor = 1.0})
       : assert(icons != null || itemCount != null),
         assert(
@@ -448,7 +454,7 @@ class _AnimatedBottomNavigationBarState
               ? ClipRect(
                   child: BackdropFilter(
                     filter: widget.blurFilter ??
-                        ImageFilter.blur(sigmaX: 5, sigmaY: 10),
+                        ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: _buildBody(context),
                   ),
                 )
@@ -472,7 +478,8 @@ class _AnimatedBottomNavigationBarState
             gradient: widget.backgroundGradient,
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment:
+                widget.mainAxisAlignment ?? MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: _buildItems(),
           ),

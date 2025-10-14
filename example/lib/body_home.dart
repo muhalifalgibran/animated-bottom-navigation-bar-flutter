@@ -18,10 +18,23 @@ class _BodyHomeState extends State<BodyHome> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Center(
-        child: Text(
-          widget.title,
-        ),
+      child: ListView(
+        children: [
+          Center(
+            child: Text(
+              widget.title,
+            ),
+          ),
+          ...List.generate(
+            10,
+            (index) => Container(
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              height: 60,
+              width: double.infinity,
+              color: index.isEven ? Colors.blue : Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
